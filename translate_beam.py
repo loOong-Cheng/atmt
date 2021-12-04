@@ -16,22 +16,25 @@ from seq2seq.beam import BeamSearch, BeamSearchNode
 def get_args():
     """ Defines generation-specific hyper-parameters. """
     parser = argparse.ArgumentParser('Sequence to Sequence Model')
-    parser.add_argument('--cuda', default=False, help='Use a GPU')
+    parser.add_argument('--cuda', default=True, help='Use a GPU')
     parser.add_argument('--seed', default=42, type=int, help='pseudo random number generator seed')
 
     # Add data arguments
-    parser.add_argument('--data', default='assignments/03/prepared', help='path to data directory')
-    parser.add_argument('--dicts', required=True, help='path to directory containing source and target dictionaries')
-    parser.add_argument('--checkpoint-path', default='checkpoints_asg4/checkpoint_best.pt', help='path to the model file')
+    parser.add_argument('--data', default='data/en-fr/prepared', help='path to data directory')
+    parser.add_argument('--dicts', default='data/en-fr/prepared', help='path to directory containing source and target dictionaries')
+    parser.add_argument('--checkpoint-path', default='assignments/03/baseline/checkpoints/checkpoint_best.pt', help='path to the model file')
     parser.add_argument('--batch-size', default=None, type=int, help='maximum number of sentences in a batch')
-    parser.add_argument('--output', default='model_translations.txt', type=str,
+    parser.add_argument('--output', default=f'assignments/04/k05a25gamma075.txt', type=str,
                         help='path to the output file destination')
     parser.add_argument('--max-len', default=100, type=int, help='maximum length of generated sequence')
 
     # Add beam search arguments
     parser.add_argument('--beam-size', default=5, type=int, help='number of hypotheses expanded in beam search')
     # alpha hyperparameter for length normalization (described as lp in https://arxiv.org/pdf/1609.08144.pdf equation 14)
-    parser.add_argument('--alpha', default=0.0, type=float, help='alpha for softer length normalization')
+    parser.add_argument('--alpha', default=0.25, type=float, help='alpha for softer length normalization')
+    # gamma hyperparameter for reranking
+    parser.add_argument('--gamma', default=0.75, type=float, help='gamma for reranking')
+    
 
     return parser.parse_args()
 
@@ -105,7 +108,7 @@ def main(args):
                 backoff_log_p = log_probs[i, :, j+1]
                 next_word = torch.where(best_candidate == tgt_dict.unk_idx, backoff_candidate, best_candidate)
                 log_p = torch.where(best_candidate == tgt_dict.unk_idx, backoff_log_p, best_log_p)
-                log_p = log_p[-1]
+                log_p = log_p[-1] - args.gamma * j
 
                 # Store the encoder_out information for the current input sentence and beam
                 emb = encoder_out['src_embeddings'][:,i,:]
@@ -160,7 +163,7 @@ def main(args):
                     backoff_log_p = log_probs[i, :, j+1]
                     next_word = torch.where(best_candidate == tgt_dict.unk_idx, backoff_candidate, best_candidate)
                     log_p = torch.where(best_candidate == tgt_dict.unk_idx, backoff_log_p, best_log_p)
-                    log_p = log_p[-1]
+                    log_p = log_p[-1] - args.gamma * j
                     next_word = torch.cat((prev_words[i][1:], next_word[-1:]))
 
                     # Get parent node and beam search object for corresponding sentence
