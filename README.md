@@ -1,8 +1,7 @@
-# atmt code base
-Materials for the first assignment of "Advanced Techniques of Machine Translation".
-Please refer to the assignment sheet for instructions on how to use the toolkit.
+# Improvement of a low-resource machine translation system. 
+Adapted from course assignement offered at University of Zurich.
 
-The toolkit is based on [this implementation](https://github.com/demelin/nmt_toolkit).
+The toolkit used is based on [this implementation](https://github.com/demelin/nmt_toolkit).
 
 # Environment Setup
 
@@ -87,18 +86,5 @@ Score with SacreBLEU
 ```
 cat path/to/postprocessed/model/translations/file | sacrebleu path/to/raw/target/test/file
 ```
-
-# Assignments
-
-Assignments must be submitted on OLAT by 14:00 on their respective
-due dates.
-
-- [x] Assignment 1: Training and evaluating an NMT model
-  with in-domain and out-of-domain data **DUE: 12.10.2021**
-- [ ] Assignment 2: Experiment design **DUE: 26.10.2021**
-- [ ] Assignment 3: Improving a low-resource NMT system
-  **DUE: 16.11.2021**
-- [ ] Assignment 4: Decoding strategies - Beam Search **DUE: 07.12.2021**
-- [ ] Assignment 5: Exam preparation **DUE: 21.12.2021**
 
 
